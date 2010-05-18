@@ -81,37 +81,54 @@ describe UsersController do
   end
 
   describe "GET 'new'" do
-    
-    it "should be successful" do
-      get :new
-      response.should be_success
+
+    describe "for non-signed-in users" do    
+
+      it "should be successful" do
+        get :new
+        response.should be_success
+      end
+      
+      it "should have the right title" do
+      	get :new
+      	response.should have_tag("title", /Sign up/)
+      end
+      
+      it "should have a name field" do
+        get :new
+        response.should have_tag( "input[name=?][type=?]", 
+                                  "user[name]", "text")
+      end
+      
+      it "should have an email field" do
+        get :new
+        response.should have_tag( "input[name=?][type=?]", 
+                                  "user[email]", "text")
+      end
+      
+      it "should have a password field" do
+        get :new
+        response.should have_tag( "input[name=?][type=?]", 
+                                  "user[password]", "password")
+      end
+      
+      it "should have a password confirmation field" do
+        get :new
+        response.should have_tag( "input[name=?][type=?]", 
+                                  "user[password_confirmation]", "password")
+      end
     end
     
-    it "should have the right title" do
-    	get :new
-    	response.should have_tag("title", /Sign up/)
-    end
+    describe "for signed-in users" do
     
-    it "should have a name field" do
-      get :new
-      response.should have_tag("input[name=?][type=?]", "user[name]", "text")
-    end
-    
-    it "should have an email field" do
-      get :new
-      response.should have_tag("input[name=?][type=?]", "user[email]", "text")
-    end
-    
-    it "should have a password field" do
-      get :new
-      response.should have_tag( "input[name=?][type=?]", 
-                                "user[password]", "password")
-    end
-    
-    it "should have a password confirmation field" do
-      get :new
-      response.should have_tag( "input[name=?][type=?]", 
-                                "user[password_confirmation]", "password")
+      before(:each) do
+        @user = test_sign_in(Factory(:user))
+      end
+      
+      it "should deny access" do
+	      get :new
+        response.should redirect_to(root_path)
+      end
     end
   end
   
@@ -135,6 +152,20 @@ describe UsersController do
       it "should render the 'new' page" do
         post :create, :user => @attr
         response.should render_template('new')
+      end
+    end
+    
+    describe "for signed-in users" do
+    
+      before(:each) do
+        @attr = { :name => "", :email => "", :password => "", 
+                  :password_confirmation => "" } 
+        @user = test_sign_in(Factory(:user))
+      end
+      
+      it "should deny access" do
+	      post :create, :user => @attr
+        response.should redirect_to(root_path)
       end
     end
     
