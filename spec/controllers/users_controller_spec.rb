@@ -12,6 +12,23 @@ describe UsersController do
 	      flash[:notice].should =~ /sign in/i
       end
     end
+
+    describe "as a non-admin user" do
+      it "should not have delete links" do
+        @user = test_sign_in(Factory(:user))
+        get :index
+        response.should_not have_tag("a", :text => "delete")
+      end
+    end
+    
+    describe "as an admin user" do
+      it "should have delete links" do
+        admin = Factory(:user, :email => "admin@example.com", :admin => true)
+        test_sign_in(admin)
+        get :index
+        response.should have_tag("a", :text => "delete")        
+      end
+    end
     
     describe "for signed-in users" do
     
